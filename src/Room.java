@@ -72,24 +72,23 @@ public class Room
         }
     }
 
-    public void updateGrid(boolean[][] newGrid, int[] robotPosition) {
+    public void updateGrid(boolean[][] newGrid, int[] robotPosition, int roomSize) {
         this.grid = newGrid;
-//        cellPanels[5][4].setBackground(Color.BLUE);
 
         for (int y = 0; y < newGrid.length; y++) {
             for (int x = 0; x < newGrid.length; x++) {
-                if (y == robotPosition[0] && x == robotPosition[1])
+                if ((x == robotPosition[0]) && (y == roomSize - robotPosition[1] - 1))
                 {
-                    System.out.println("robot detected at: " + y +","+ x);
-                    cellPanels[y][x].setBackground(Color.RED);
+//                    System.out.println("robotPosition[1]: " + x +", robotPosition[0]: "+ y);
+                    cellPanels[x][y].setBackground(Color.RED);
                 }
-                else if (newGrid[x][y])
+                else if (newGrid[y][x])
                 {
-                    cellPanels[y][x].setBackground(Color.WHITE);
+                    cellPanels[x][y].setBackground(Color.WHITE);
                 }
                 else
                 {
-                    cellPanels[y][x].setBackground(Color.GRAY);
+                    cellPanels[x][y].setBackground(Color.GRAY);
                 }
             }
         }
