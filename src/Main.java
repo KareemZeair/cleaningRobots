@@ -55,15 +55,6 @@ public class Main
         }
     }
 
-    // prints the grid to the console
-    public static void printGrid(boolean[][] grid, int roomSize)
-        {
-            for (int i = 0; i < grid.length; i++)
-            {
-                System.out.println(Arrays.toString(grid[i]));
-            }
-        }
-
     // Creates robot objects corresponding to provided robots.txt and adds them to robots list
     public static void robotFactory() throws FileNotFoundException
     {

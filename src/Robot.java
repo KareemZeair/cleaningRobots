@@ -91,8 +91,6 @@ public class Robot
                         robot.setX(robotX);//robotCoordinates = new int[]{robotX, (roomSize-1-robotY)};
                         robot.setY(roomSize-1-robotY);//robotCoordinates = new int[]{robotX, (roomSize-1-robotY)};
 
-                        System.out.println(Arrays.toString(robot.getRobotCoordinates()));
-
                         room.updateGrid(grid, robot.getRobotCoordinates(), roomSize, robots);
 
                         // thread delay
@@ -121,9 +119,6 @@ public class Robot
     // circular movement of a robot with updates to the grid and the GUI
     public void moveCircularly (Robot robot, int roomSize, boolean[][] grid, Room room, boolean roomIsClean, ArrayList<Robot> robots, boolean collision, int index) throws InterruptedException
     {
-        System.out.println(Arrays.toString(robot.getRobotCoordinates()));
-        System.out.println("kkk");
-
         int robotX = robot.getRobotCoordinates()[0];
         int robotY = roomSize - 1 - robot.getRobotCoordinates()[1];
 
@@ -138,11 +133,10 @@ public class Robot
 
             roomIsClean = true;
 
-            if (robotX == roomSize - 1 && robotY < roomSize - 1){robotY++;System.out.println("1");} //right edge move up
-            else if (robotY == roomSize - 1 && robotX > 0){robotX--; System.out.println("3");} //top edge move left
-            else if (robotX == 0 && robotY > 0){robotY--;System.out.println("2");} //left edge move down
-            else if (robotY == 0 && robotX < roomSize - 1){robotX++;
-                System.out.println("4");} //bottom edge move right
+            if (robotX == roomSize - 1 && robotY < roomSize - 1){robotY++;} //right edge move up
+            else if (robotY == roomSize - 1 && robotX > 0){robotX--;} //top edge move left
+            else if (robotX == 0 && robotY > 0){robotY--;} //left edge move down
+            else if (robotY == 0 && robotX < roomSize - 1){robotX++;} //bottom edge move right
 
             // update robot position
             robot.setX(robotX);// = new int[]{robotX, (roomSize-1-robotY)};
@@ -174,7 +168,6 @@ public class Robot
                 (robotX == roomSize - 1 && Objects.equals(robot.direction, "U")) || (robotX ==0 && Objects.equals(robot.direction, "D")))
         {
             robot.movementType = 'C';
-            System.out.println("c");
         }
 
         else
