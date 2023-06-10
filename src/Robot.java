@@ -1,40 +1,13 @@
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.Scanner;
-
-
-//! Need to add throw statement for when robots.txt is empty but ask Dr. Reza to be sure..
-//! Need to add throw statement for when robots.txt is empty but ask Dr. Reza to be sure..
-//! Need to add throw statement for when robots.txt is empty but ask Dr. Reza to be sure..
-//! Need to add throw statement for when robots.txt is empty but ask Dr. Reza to be sure..
-
 
 public class Robot
 {
-    String fileName = "robots.txt"; // Specify the path and name of your text file
-    File file = new File(fileName);
     private int x;
     private int y;
-//    int[] robotCoordinates = new int[2]; // {Y-axis, X-axis}
     private String direction;
     private Thread thread;
     private char movementType = 'S';
-
-    public void main(String[] args)
-    {
-        try
-        {
-            Scanner scanner = new Scanner(file);
-            scanner.close();
-        }
-        catch (FileNotFoundException e)
-        {
-            System.out.println("INPUT ERROR");
-        }
-    }
 
     // spiral movement of a robot with updates to the grid and the GUI
     public void moveSpirally(Robot robot, int roomSize, boolean[][] grid, Room room, boolean roomIsClean, ArrayList<Robot> robots, boolean collision, int index) throws InterruptedException
@@ -88,8 +61,8 @@ public class Robot
                         else if (direction == 3) {robotX++;} // Right
 
                         // update robot position
-                        robot.setX(robotX);//robotCoordinates = new int[]{robotX, (roomSize-1-robotY)};
-                        robot.setY(roomSize-1-robotY);//robotCoordinates = new int[]{robotX, (roomSize-1-robotY)};
+                        robot.setX(robotX);
+                        robot.setY(roomSize-1-robotY);
 
                         room.updateGrid(grid, robot.getRobotCoordinates(), roomSize, robots);
 
@@ -198,37 +171,13 @@ public class Robot
     }
 
 
-    // Setters
+    // Setters & Getters
     public void setDirection(String direction) {this.direction = direction;}
-
-    //getters
-
-    public int[] getRobotCoordinates()
-    {
-        return new int[]{x, y};
-    }
-    public String getDirection()
-    {
-        return direction;
-    }
-    public char getMovementType()
-    {
-        return movementType;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    public int getY() {
-        return y;
-    }
+    public int[] getRobotCoordinates() {return new int[]{x, y};}
+    public String getDirection() {return direction;}
+    public char getMovementType() {return movementType;}
+    public void setX(int x) {this.x = x;}
+    public int getX() {return x;}
+    public void setY(int y) {this.y = y;}
+    public int getY() {return y;}
 }

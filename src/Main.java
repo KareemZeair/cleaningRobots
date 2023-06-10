@@ -1,13 +1,11 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class Main
 {
-    static String fileName = "robots.txt"; // Specify the path and name of your text file
-    static File robotsFile = new File(fileName);
     private static ArrayList<Robot> robots = new ArrayList<>();
     private static final ArrayList<Thread> threads = new ArrayList<>();
     public static int roomSize;
@@ -21,7 +19,8 @@ public class Main
         Room room = new Room(grid, roomSize);
 
         //add robots in the file and the center robot to the arraylist of robots
-        robotFactory();
+        try {if (robotFactory()!=null){throw Objects.requireNonNull(robotFactory());}}
+        catch (FileNotFoundException e) {System.out.println("INPUT ERROR"); throw new FileNotFoundException();}
         addCenterRobot();
 
 
@@ -55,20 +54,27 @@ public class Main
         }
     }
 
-    // Creates robot objects corresponding to provided robots.txt and adds them to robots list
-    public static void robotFactory() throws FileNotFoundException
+    // Creates robot objects from robots.txt and adds them to robots list
+    public static FileNotFoundException robotFactory()
     {
-        int[] initialCoordinates = new int[2];
-        String initialDirection;
-        String filePath = "robots.txt";
-//        ArrayList<Robot> robots = new ArrayList<Robot>();
-         // Create a Scanner object to read from the file
+        try
+        {
+            int[] initialCoordinates = new int[2];
+            String initialDirection;
+            String filePath = "robots.txt";
+
+            // Create a Scanner object to read from the file
             Scanner scanner = new Scanner(new File(filePath));
-            String num = scanner.nextLine();
+            if (!scanner.hasNext())
+            {throw new FileNotFoundException();}
+
+            int num = scanner.nextInt();
+            int robotCount = 0;
 
             // Read and store the data from each line
             while (scanner.hasNextLine())
             {
+                robotCount++;
                 Robot robot = new Robot();
                 // Read the data as "int int string" format
                 int num1 = scanner.nextInt();
@@ -80,27 +86,17 @@ public class Main
                 initialDirection = str;
 
                 // update new robot with initial coordinates and initial direction and add them to robots list
-                robot.setX(initialCoordinates[0]);//= initialCoordinates;
-                robot.setY(initialCoordinates[1]);//= initialCoordinates;
+                robot.setX(initialCoordinates[0]);
+                robot.setY(initialCoordinates[1]);
                 robot.setDirection(initialDirection);
                 Main.robots.add(robot);
             }
             // Close the scanner
             scanner.close();
-    }
-
-    // create and add robot at center
-    public static void addCenterRobot()
-    {
-        int center = (int) Math.floor(roomSize / 2);
-        Robot centerRobot = new Robot();
-        int[] Center = new int[2];
-        Center[0] = center;
-        Center[1] = center;
-        centerRobot.setX(Center[0]);// = Center;
-        centerRobot.setY(Center[1]);// = Center;
-        centerRobot.setDirection("U");
-        robots.add(centerRobot);
+            if (robotCount != num-1){throw new FileNotFoundException();}
+        }
+        catch(FileNotFoundException e) {return e;}
+        return null;
     }
 
     // gets room size from room.txt file
@@ -118,14 +114,21 @@ public class Main
             scanner.close();
             if (roomSize == 0) {throw new FileNotFoundException();}
         }
-        catch (FileNotFoundException e) {
-            System.out.println("INPUT ERROR");
-        }
+        catch (FileNotFoundException e) {System.out.println("INPUT ERROR");}
         return roomSize;
     }
 
-//    public static void setRobots(ArrayList<Robot> robots)
-//    {
-//        Main.robots = robots;
-//    }
+    // create and add robot at center
+    public static void addCenterRobot()
+    {
+        int center = (int) Math.floor(roomSize / 2);
+        Robot centerRobot = new Robot();
+        int[] Center = new int[2];
+        Center[0] = center;
+        Center[1] = center;
+        centerRobot.setX(Center[0]);
+        centerRobot.setY(Center[1]);
+        centerRobot.setDirection("U");
+        robots.add(centerRobot);
+    }
 }
