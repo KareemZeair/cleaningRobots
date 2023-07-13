@@ -9,26 +9,39 @@ public class Main
     private static ArrayList<Robot> robots = new ArrayList<>();
     private static final ArrayList<Thread> threads = new ArrayList<>();
     public static int roomSize;
-    private static boolean roomIsClean = true;
+    private static boolean roomIsClean = false;
     private static boolean collision = false;
 
-    public static void main(String[] args) throws InterruptedException, FileNotFoundException
+    public static void main(String[] args) throws FileNotFoundException
     {
         roomSize = getRoomSize();
         boolean[][] grid = new boolean[roomSize][roomSize];
         Room room = new Room(grid, roomSize);
 
         //add robots in the file and the center robot to the arraylist of robots
-        try {if (robotFactory()!=null){throw Objects.requireNonNull(robotFactory());}}
-        catch (FileNotFoundException e) {System.out.println("INPUT ERROR"); throw new FileNotFoundException();}
+        try
+        {
+            if (robotFactory() != null)
+            {
+                throw Objects.requireNonNull(robotFactory());
+            }
+        }
+        catch (FileNotFoundException e)
+        {
+            System.out.println("INPUT ERROR");
+            throw new FileNotFoundException();
+        }
         addCenterRobot();
 
 
         // Create and start threads for each robot
-        for (int i = 0; i < robots.size(); i++) {
+        while (!roomIsClean)
+        {
+            for (int i = 0; i < robots.size(); i++)
+            {
 
-            int finalI = i;
-            Thread robotThread = new Thread(() -> {
+                int finalI = i;
+//            Thread robotThread = new Thread(() -> {
                 // Code for the robot's movement logic
                 try
                 {
@@ -47,12 +60,13 @@ public class Main
                 {
                     throw new RuntimeException(e);
                 }
-            });
+            }
 
-            threads.add(robotThread);
-            robotThread.start();
+//            threads.add(robotThread);
+//            robotThread.start();
         }
     }
+//    }
 
     // Creates robot objects from robots.txt and adds them to robots list
     public static FileNotFoundException robotFactory()
@@ -112,9 +126,12 @@ public class Main
                 roomSize = Integer.parseInt(line);
             }
             scanner.close();
-            if (roomSize == 0) {throw new FileNotFoundException();}
+            if (roomSize <= 0 || roomSize % 10 == 5) {throw new FileNotFoundException();}
         }
-        catch (FileNotFoundException e) {System.out.println("INPUT ERROR");}
+        catch (FileNotFoundException e)
+        {
+            System.out.println("INPUT ERROR");
+        }//return 0;}
         return roomSize;
     }
 

@@ -6,13 +6,16 @@ public class Robot
     private int x;
     private int y;
     private String direction;
-    private Thread thread;
     private char movementType = 'S';
+    int counter = 0; // Number of moves in each direction
+    int maxDistance = 1;
+    int iterator = 0;
+
+
 
     // spiral movement of a robot with updates to the grid and the GUI
     public void moveSpirally(Robot robot, int roomSize, boolean[][] grid, Room room, boolean roomIsClean, ArrayList<Robot> robots, boolean collision, int index) throws InterruptedException
     {
-        int moveCount = 1; // Number of moves in each direction
         String initialDirection = robot.getDirection();
         int direction;
         int robotX = robot.getRobotCoordinates()[0];
@@ -24,20 +27,36 @@ public class Robot
         else if (Objects.equals(initialDirection, "U")) {direction = 2;}
         else {direction = 3;}
 
-        while (true)
-        {
+//        while (true)
+//        {
             robot.setMovementType(robot, roomSize);
 
             if (robot.movementType == 'S')
             {
-                for (int i = 0; i < moveCount; i++)
-                {
+//                for (int i = 0; i < moveCount; i++)
+//                {
                     robot.setMovementType(robot, roomSize);
 
                     if (robot.movementType == 'S')
                     {
                         collision = checkForCollision(robots, collision);
-                        if (collision){break;}
+                        if (collision){return;}
+
+                        if (counter == 2) {
+                            counter = 0;
+                            maxDistance++;
+                        }
+                        else {
+                            if (iterator < maxDistance) {
+                                iterator++;
+                            }
+                            else {
+                                counter++;
+                                iterator=0;
+                                direction = (direction + 3) % 4;
+                                System.out.println("CHANGED DIRECTION" + direction + robot.getDirection());
+                            }
+                        }
 
                         roomIsClean = true;
 
@@ -48,11 +67,11 @@ public class Robot
                         // if room is dirty set roomIsClean to false
                         for (boolean[] booleans : grid)
                         {
-                            for (boolean j : booleans) {if (!j){roomIsClean = false;break;}}
+                            for (boolean j : booleans) {if (!j){roomIsClean = false;}}
                             if (!roomIsClean){break;}
                         }
                         //check if room is clean to break from while loop
-                        if (roomIsClean){System.out.println("ROOM IS CLEAN"); break;}
+                        if (roomIsClean){System.out.println("ROOM IS CLEAN"); return;}
 
                         // Move the robot in the current direction
                         if (direction == 0) {robotY--;} // Down
@@ -67,27 +86,28 @@ public class Robot
                         room.updateGrid(grid, robot.getRobotCoordinates(), roomSize, robots);
 
                         // thread delay
-                        Thread.sleep(50);
+                        Thread.sleep(2000);
                     }
-                }
-                if (collision){;break;}
+//                }
+//                if (collision){;break;}
             }
-            else {break;}
+            else {return;}
 
             // Increment moveCount every second move in the same direction
-            if (direction % 2 == 1) {moveCount++;}
+//            if (direction % 2 == 1) {moveCount++;}
 
             // Update the direction (cycle counter-clockwise: 0, 3, 2, 1)
-            direction = (direction + 3) % 4;
+
+
 
             if (direction == 0) {robot.setDirection("D");}
             else if (direction == 3) {robot.setDirection("L");}
             else if (direction == 2) {robot.setDirection("U");}
             else {robot.setDirection("R");}
 
-            if (roomIsClean){System.out.println("ROOM IS CLEAN"); break;}
+            if (roomIsClean){System.out.println("ROOM IS CLEAN");} //break;}
         }
-    }
+//    }
 
     // circular movement of a robot with updates to the grid and the GUI
     public void moveCircularly (Robot robot, int roomSize, boolean[][] grid, Room room, boolean roomIsClean, ArrayList<Robot> robots, boolean collision, int index) throws InterruptedException
@@ -95,10 +115,10 @@ public class Robot
         int robotX = robot.getRobotCoordinates()[0];
         int robotY = roomSize - 1 - robot.getRobotCoordinates()[1];
 
-        while (!roomIsClean)
-        {
+//        while (!roomIsClean)
+//        {
             collision = checkForCollision(robots, collision);
-            if (collision){break;}
+//            if (collision){break;}
 
             // iterate over robots list and change corresponding cell positions from dirty(False) to clean(True)
             int[] robot1Position = robot.getRobotCoordinates();
@@ -120,17 +140,17 @@ public class Robot
             // check if room is clean
             for (boolean[] booleans : grid)
             {
-                for (boolean j : booleans) {if (!j){roomIsClean = false;break;}}
+                for (boolean j : booleans) {if (!j){roomIsClean = false;}}
                 if (!roomIsClean){break;}
             }
 
             // thread delay
-            Thread.sleep(50);
+            Thread.sleep(2000);
 
             //check if room is clean to break from while loop
             if (roomIsClean){System.out.println("ROOM IS CLEAN");} //break;}
         }
-    }
+//    }
 
     public void setMovementType(Robot robot, int roomSize)
     {
