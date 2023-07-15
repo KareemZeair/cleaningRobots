@@ -3,9 +3,12 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
+import mpi.*;
+import java.util.Random;
 
 public class Main
 {
+
     private static ArrayList<Robot> robots = new ArrayList<>();
     private static final ArrayList<Thread> threads = new ArrayList<>();
     public static int roomSize;
@@ -14,44 +17,63 @@ public class Main
 
     public static void main(String[] args) throws InterruptedException, FileNotFoundException
     {
-        roomSize = getRoomSize();
-        boolean[][] grid = new boolean[roomSize][roomSize];
-        Room room = new Room(grid, roomSize);
+        MPI.Init(args);
+        int rank = MPI.COMM_WORLD.Rank();
+        int size = MPI.COMM_WORLD.Size();
+//        System.out.println("HELLO WORLD");
+//        System.out.println("Rank: " + rank);
+//        System.out.println("Size: " + size);
 
-        //add robots in the file and the center robot to the arraylist of robots
-        try {if (robotFactory()!=null){throw Objects.requireNonNull(robotFactory());}}
-        catch (FileNotFoundException e) {System.out.println("INPUT ERROR"); throw new FileNotFoundException();}
-        addCenterRobot();
+        if (rank == 0) {
+            roomSize = getRoomSize();
+            boolean[][] grid = new boolean[roomSize][roomSize];
+            Room room = new Room(grid, roomSize);
+
+            //add robots in the file and the center robot to the arraylist of robots
+            try {if (robotFactory()!=null){throw Objects.requireNonNull(robotFactory());}}
+            catch (FileNotFoundException e) {System.out.println("INPUT ERROR"); throw new FileNotFoundException();}
+            addCenterRobot();
 
 
-        // Create and start threads for each robot
-        for (int i = 0; i < robots.size(); i++) {
+            // Create and start threads for each robot
+            for (int i = 0; i < robots.size(); i++) {
 
-            int finalI = i;
-            Thread robotThread = new Thread(() -> {
-                // Code for the robot's movement logic
-                try
-                {
-                    Robot robot = robots.get(finalI);
-                    if (robot.getMovementType() == 'S' && !collision)
+                int finalI = i;
+                Thread robotThread = new Thread(() -> {
+                    // Code for the robot's movement logic
+                    try
                     {
-                        robot.moveSpirally(robot, roomSize, grid, room, roomIsClean, robots, false, finalI);
-                        robot.setMovementType(robot, roomSize);
+                        Robot robot = robots.get(finalI);
+                        if (robot.getMovementType() == 'S' && !collision)
+                        {
+                            robot.moveSpirally(robot, roomSize, grid, room, roomIsClean, robots, false, finalI);
+                            robot.setMovementType(robot, roomSize);
+                        }
+                        if (robot.getMovementType() == 'C' && !collision)
+                        {
+                            robot.moveCircularly(robot, roomSize, grid, room, false, robots, false, finalI);
+                        }
                     }
-                    if (robot.getMovementType() == 'C' && !collision)
+                    catch (InterruptedException e)
                     {
-                        robot.moveCircularly(robot, roomSize, grid, room, false, robots, false, finalI);
+                        throw new RuntimeException(e);
                     }
-                }
-                catch (InterruptedException e)
-                {
-                    throw new RuntimeException(e);
-                }
-            });
+                });
 
-            threads.add(robotThread);
-            robotThread.start();
+                threads.add(robotThread);
+                robotThread.start();
+            }
         }
+        else {
+//            for (int i = 0; i < robots.size(); i++)
+//            {
+            int[] buffer = new int[1];
+                MPI.COMM_WORLD.Recv(buffer, 0, 1, MPI.INT, 4, 0);
+//            }
+
+        }
+
+        MPI.Finalize();
     }
 
     // Creates robot objects from robots.txt and adds them to robots list
@@ -76,6 +98,8 @@ public class Main
             {
                 robotCount++;
                 Robot robot = new Robot();
+                System.out.println("test");
+
                 // Read the data as "int int string" format
                 int num1 = scanner.nextInt();
                 int num2 = scanner.nextInt();
@@ -89,6 +113,11 @@ public class Main
                 robot.setX(initialCoordinates[0]);
                 robot.setY(initialCoordinates[1]);
                 robot.setDirection(initialDirection);
+                Random random = new Random();
+                int randomId = random.nextInt(100); // Adjust the upper bound as needed
+                System.out.println("test");
+                System.out.println("randomID= " + randomId);
+                robot.setRobotId(randomId);
                 Main.robots.add(robot);
             }
             // Close the scanner
@@ -129,6 +158,7 @@ public class Main
         centerRobot.setX(Center[0]);
         centerRobot.setY(Center[1]);
         centerRobot.setDirection("U");
+        centerRobot.setRobotId(101);
         robots.add(centerRobot);
     }
 }

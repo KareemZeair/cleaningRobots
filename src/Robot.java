@@ -1,3 +1,6 @@
+import mpi.MPI;
+import mpi.MPIException;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -7,7 +10,11 @@ public class Robot
     private int y;
     private String direction;
     private Thread thread;
+    private int robotSection;
     private char movementType = 'S';
+    private int robotId;
+    private int prevSection;
+    private int currentSection;
 
     // spiral movement of a robot with updates to the grid and the GUI
     public void moveSpirally(Robot robot, int roomSize, boolean[][] grid, Room room, boolean roomIsClean, ArrayList<Robot> robots, boolean collision, int index) throws InterruptedException
@@ -52,13 +59,42 @@ public class Robot
                             if (!roomIsClean){break;}
                         }
                         //check if room is clean to break from while loop
-                        if (roomIsClean){System.out.println("ROOM IS CLEAN"); break;}
+                        if (roomIsClean){System.out.println("ROOM IS CLEAN"); System.exit(0);}
+
+                        prevSection = getSection(robotX, robotY, roomSize);
 
                         // Move the robot in the current direction
                         if (direction == 0) {robotY--;} // Down
                         else if (direction == 1) {robotX--;} // Left
                         else if (direction == 2) {robotY++;} // Up
                         else if (direction == 3) {robotX++;} // Right
+
+                        currentSection = getSection(robotX, robotY, roomSize);
+
+                        if (currentSection != prevSection)
+                        {
+                            try {
+                                MPI.COMM_WORLD.Send(new int[]{this.robotId}, 0, 1, MPI.INT, 7, 0);
+                            } catch (MPIException e) {
+                                e.printStackTrace();
+//                                MPI.Finalize();
+//                                System.exit(1);
+                            }
+                            System.out.println("Process " + this.robotSection + ": Sent robotID = " + this.robotId + " to process 1");
+
+                            try {
+                                MPI.COMM_WORLD.Probe(0, 0);
+                                int[] buffer = new int[1];
+                                MPI.COMM_WORLD.Recv(buffer, 0, 1, MPI.INT, 0, 0);
+                                this.robotId = buffer[0];
+                            } catch (MPIException e) {
+                                e.printStackTrace();
+//                                MPI.Finalize();
+//                                System.exit(1);
+                            }
+                            System.out.println("moved from: " + prevSection + " to " + currentSection);
+                        }
+
 
                         // update robot position
                         robot.setX(robotX);
@@ -67,7 +103,7 @@ public class Robot
                         room.updateGrid(grid, robot.getRobotCoordinates(), roomSize, robots);
 
                         // thread delay
-                        Thread.sleep(50);
+                        Thread.sleep(600);
                     }
                 }
                 if (collision){;break;}
@@ -85,7 +121,7 @@ public class Robot
             else if (direction == 2) {robot.setDirection("U");}
             else {robot.setDirection("R");}
 
-            if (roomIsClean){System.out.println("ROOM IS CLEAN"); break;}
+            if (roomIsClean){System.out.println("ROOM IS CLEAN"); System.exit(0);}
         }
     }
 
@@ -125,10 +161,10 @@ public class Robot
             }
 
             // thread delay
-            Thread.sleep(50);
+            Thread.sleep(600);
 
             //check if room is clean to break from while loop
-            if (roomIsClean){System.out.println("ROOM IS CLEAN");} //break;}
+            if (roomIsClean){System.out.println("ROOM IS CLEAN"); System.exit(0);}
         }
     }
 
@@ -175,9 +211,25 @@ public class Robot
     public void setDirection(String direction) {this.direction = direction;}
     public int[] getRobotCoordinates() {return new int[]{x, y};}
     public String getDirection() {return direction;}
+    public int getPrevSection() {return this.prevSection;}
+    public int getCurrentSection() {return this.currentSection;}
     public char getMovementType() {return movementType;}
     public void setX(int x) {this.x = x;}
     public int getX() {return x;}
     public void setY(int y) {this.y = y;}
+    public void setRobotId(int id) {this.robotId = id;}
+    public int getRobotId() {return this.robotId;}
     public int getY() {return y;}
+
+    public static int getSection(int x, int y, int roomSize) {
+        int sectionSize = 5; // Size of each section (5x5)
+        int sectionsPerRow =  roomSize/5; // Number of sections per row (15/5)
+
+        int sectionX = x / sectionSize; // Calculate the section's x-coordinate
+        int sectionY = (roomSize - 1 - y) / sectionSize; // Calculate the section's y-coordinate with y flipped
+
+        int sectionIndex = (sectionY % sectionsPerRow) * sectionsPerRow + (sectionX % sectionsPerRow);
+
+        return sectionIndex;
+    }
 }
